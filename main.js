@@ -8,9 +8,13 @@ const cdThumbnail = $('.cd-thumb')
 const audio = $('#audio')
 const playBtn = $('.btn-toggle-play')
 const progress = $('#progress')
+const nextBtn = $('.btn-next')
+const prevBtn = $('.btn-prev')
+const randomBtn = $('.btn-random')
 const app = {
     currentIndex: 0,
     isPlaying: false,
+    isRandom: false,
   songs: [
     {
       name: "Mặt Mộc",
@@ -77,7 +81,7 @@ const app = {
                 <div
                     class="thumb"
                     style="
-                    background-image: '${song.image}';
+                    background-image: url('${song.image}');
                     "
           ></div>
           <div class="body">
@@ -103,6 +107,15 @@ const app = {
     const cdWidth = cd.offsetWidth
     const _this = this
 
+    // Xử lý CD quay
+    const cdThumbnailAnimate = cdThumbnail.animate([
+        {transform: 'rotate(360deg)'}
+    ], {
+        duration: 10000, //10 seconds
+        iteration: Infinity
+    })
+
+    cdThumbnailAnimate.pause()
     // Xử lý phóng to / thu nhỏ CD
     document.onscroll = () => {
        const scrollTop = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop;
@@ -125,12 +138,15 @@ const app = {
     audio.onplay = function (){
         _this.isPlaying = true
         player.classList.add('playing')
+        cdThumbnailAnimate.play()
     }
 
     // Khi song isPaused (đang dừng hoặc chưa phát)
     audio.onpause = function () {
         _this.isPlaying = false
         player.classList.remove('playing')
+        cdThumbnailAnimate.pause()
+
     }
 
     // Khi tiến độ bài hát thay đổi
@@ -147,6 +163,23 @@ const app = {
         audio.currentTime = seekTime
     }
 
+    // Khi nextSong Button CLicked
+    nextBtn.onclick = function () {
+        _this.nextSong()
+        audio.play()
+    }
+
+    // Khi preSong Button CLicked
+    prevBtn.onclick = function () {
+        _this.preSong()
+        audio.play()
+    }
+
+    // Khi Random bài hát
+    randomBtn.onclick = function () {
+        _this.isRandom = !_this.isRandom
+        randomBtn.classList.toggle('active', _this.isRandom)
+    }
   },
 
   loadCurrentSong: function () {
@@ -155,6 +188,27 @@ const app = {
     audio.src = this.currentSong.path
     
   },
+
+  nextSong: function () {
+    this.currentIndex++;
+    if(this.currentIndex >= this.songs.length){
+        this.currentIndex = 0
+    }
+    this.loadCurrentSong()
+  },
+  preSong: function () {
+    this.currentIndex--;
+    if(this.currentIndex < 0){
+        this.currentIndex = this.songs.length-1
+    }
+    this.loadCurrentSong()
+  },
+  
+  playRandomSong: function () {
+
+  },
+
+  
 
   start: function () {
     //Định nghĩa các thuộc tính của ob
